@@ -1,7 +1,9 @@
 priority() => 2
 is_active() => 'civ iv: beyond the sword'
-on_activate() => setState(grid, screengrid.Grid()) keyboard.add_delay(/numkey\d/, 1) print('civ 4 activate')
-on_deactivate() => keyboard.remove_delay(/numkey\d/) print('civ 4 deactivate')
+is_active() => true()
+on_load() => extensions.register('civ4.civ4.py', 'civ4')
+on_activate() => setState(grid, screengrid.Grid()) keyboard.add_delay(/numkey\d/, 1) civ4.start()
+on_deactivate() => keyboard.remove_delay(/numkey\d/) print('civ 4 deactivate') civ4.stop()
 mouseMove(pos) => mouse.move($pos[0], $pos[1])
 moveUnit(key, count) => {$key}~$count
 doubleClick() => mouse.click() wait(.05) mouse.click()
@@ -13,7 +15,11 @@ edgeEast := east=[2000, 600]
 edgeSouth := south=[600, 2000]
 edgeWest := west=[0, 600]
 edges := <edgeNorth> | <edgeEast> | <edgeSouth> | <edgeWest>
+units := settler | worker
+buildings := barracks | granary
+buildable := <units> | <buildings>
 
+build <buildable> = civ4.click_asset($1)
 <literal_direction> [<number>] = {$1}~$2
 record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)

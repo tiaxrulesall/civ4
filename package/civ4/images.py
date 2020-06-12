@@ -18,33 +18,45 @@ def match_template_filename(img, template_filename):
     return match_template(img, get_asset_image(template_filename))
 
 def match_template(img, template):
-    width, height = template.shape[::-1]
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     if max_val < 0.95:
         return None
     left, top = max_loc
-    bottom, right = top + height, left + width
+    width, height = template.shape[::-1]
     return {
         'top': top,
         'left': left,
-        'bottom': bottom,
-        'right': right,
+        'height': height,
+        'width': width,
     }
 
-def show_match(img, match, title=None):
-    top_left = match['left'], match['top']
-    bottom_right = match['right'], match['bottom']
+def overlay_rectangle(img, rectangle):
+    top_left = rectangle['left'], rectangle['top']
+    bottom_right = rectangle['left'] + rectangle['width'], rectangle['top'] + rectangle['height']
     img = img.copy()
     cv2.rectangle(img, top_left, bottom_right, 255, 2)
+    return img
+
+def show_image(img, title=None):
     plt.imshow(img, cmap = 'gray')
     if title is not None:
         plt.title(title), plt.xticks([]), plt.yticks([])
     plt.get_current_fig_manager().window.state('zoomed')
     plt.show()    
 
-def screenshot():
+def screenshot(monitor_num=1, bounds_fn=None):
     with mss.mss() as sct:
+        monitor = sct.monitors[monitor_num]
+        ss_bounds = bounds_fn(monitor) if bounds_fn else monitor
         # Get a screenshot of the 1st monitor
-        sct_img = sct.grab(sct.monitors[1])
-        return numpy.array(sct_img)
+        sct_img = sct.grab(ss_bounds)
+        return cv2.cvtColor(numpy.array(sct_img), cv2.COLOR_RGB2GRAY), monitor, ss_bounds
+
+def screenshot_from_file(filename, bounds_fn=None):
+    img = cv2.imread(filename, 0)
+    width, height = img.shape[::-1]
+    bounds = {'left': 0, 'top': 0, 'width': width, 'height': height}
+    ss_bounds = bounds_fn(bounds) if bounds_fn else bounds
+    crop_img = img[ss_bounds['top']: ss_bounds['top'] + ss_bounds['height'], ss_bounds['left']: ss_bounds['left'] + ss_bounds['width']]
+    return crop_img, bounds, ss_bounds

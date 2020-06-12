@@ -11,8 +11,8 @@ proc = None
 responses = {}
 
 def location_center(loc):
-    x = (loc['right'] + loc['left']) // 2
-    y = (loc['bottom'] + loc['top']) // 2
+    x = loc['left'] + loc['width']//2
+    y = loc['top'] + loc['height']//2
     return x, y
 
 def start():

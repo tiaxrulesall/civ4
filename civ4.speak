@@ -19,7 +19,8 @@ units := airship | archer | axeman | bomber | catapult | chariot | maceman | pik
 buildings := barracks | courthouse | forge | granary | library | university
 national_wonders := palace | (national park)
 world_wonders := (the pyramids) | stonehenge | shwedagon paya
-buildable := <units> | <buildings> | <national_wonders> | <world_wonders>
+other_builables := wealth | research | culture
+buildable := <units> | <buildings> | <national_wonders> | <world_wonders> | <other_builables>
 
 build <buildable> = civ4.build($1)
 <literal_direction> [<number>] = {$1}~$2
@@ -62,4 +63,20 @@ route to = mouse.move(300, 300) {alt r}  state.grid.overlay(click=True)
 build [a] road = r
 sleep | fortify = f
 skip turn = {space}
+finish turn = {shift enter}
 build city = b
+sentry = s
+build improvements = a
+build trade network = n
+improve nearest city = {shift ctrl c}
+cancel automation = {backspace}
+explore = e
+
+nearest city = {ins}
+
+increase science [<number>] = mouse.move(80, 60) mouse.click()~$1
+reduce science [<number>] = mouse.move(100, 60) mouse.click()~$1
+increase culture [<number>] = mouse.move(80, 80) mouse.click()~$1
+reduce culture [<number>] = mouse.move(100, 80) mouse.click()~$1
+increase espionage [<number>] = mouse.move(80, 100) mouse.click()~$1
+reduce espionage [<number>] = mouse.move(100, 100) mouse.click()~$1

@@ -32,7 +32,10 @@ def handle_input(msg, scenes):
         for scene_name in ['Start Turn', 'City Build']:
             scene = scenes[scene_name]
             ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=scene.bounds)
-            initial_match = scene.find_initial_match(ss, msg['asset'])
+            try:
+                initial_match = scene.find_initial_match(ss, msg['asset'])
+            except RuntimeError:
+                continue
             adjusted_matches = {k: adjust_match(v, monitor, ss_bounds) for k, v in initial_match.items()}
             if adjusted_matches:
                 return {'scene': scene_name, 'matches': adjusted_matches}

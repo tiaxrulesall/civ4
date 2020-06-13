@@ -28,14 +28,27 @@ def stop():
     proc.kill()
     print('c4stop')
 
-def click_asset(name):
+def build(name):
     mouse.move(9999, 9999)
-    resp = request({"type": "find initial match", "scene": "Start Turn", "asset": name})
-    if resp['matches'] and resp['matches'][name]:
+    resp = request({"type": "build initial", "asset": name})
+    scene = resp.get('scene')
+    down_arrow = resp['matches'].get('down arrow')
+    if not scene:
+        return
+    if resp['matches'] and name in resp['matches']:
         center = location_center(resp['matches'][name])
         mouse.move(center[0], center[1])
         mouse.click()
-    print(resp)
+    elif down_arrow:
+        print(down_arrow)
+        downx, downy = location_center(down_arrow)
+        if scene == 'Start Turn':
+            mouse.move(downx, downy - 15)
+            mouse.click()
+            time.sleep(3)
+            resp = request({"type": "build", 'scene': scene, "asset": name})
+            print('aik', resp)
+
 
 def request(msg):
     msg_id = str(uuid.uuid4())
@@ -53,4 +66,4 @@ def request(msg):
 
 def _on_message(msg_str):
     msg = json.loads(msg_str)
-    responses[msg['id']] = msg
+    responses[msg['id']] = msg['value']

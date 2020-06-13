@@ -9,7 +9,7 @@ class Scene:
 
 class StartTurnScene:
 
-    def screenshot_bounds(self, monitor):
+    def bounds(self, monitor):
         # anchored to top right
         width = 500
         height = 560
@@ -31,13 +31,16 @@ class StartTurnScene:
                 'down arrow': images.match_template_filename(img, self.asset_to_filename('down arrow')),
             }
 
+    def find_match(self, img, asset_name):
+        return images.match_template_filename(img, self.asset_to_filename(asset_name))
+
     def asset_to_filename(self, asset_name: str):
         asset_name_dash = '-'.join(asset_name.split())
         return f'..\\assets\\start-turn-{asset_name_dash}.png'
 
 class CityBuildScene:
 
-    def screenshot_bounds(self):
+    def bounds(self):
         pass
 
     def find_initial_match(self, img, asset_name):
@@ -52,7 +55,7 @@ class CityBuildScene:
 
     def asset_to_filename(self, asset_name: str):
         asset_name_dash = '-'.join(asset_name.split())
-        return f'..\\assets\\start-turn-{asset_name_dash}.png'
+        return f'..\\assets\\{asset_name_dash}.png'
 
 def load_scenes():
     return {

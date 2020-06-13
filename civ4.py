@@ -38,9 +38,9 @@ def build(asset):
     mouse.move(300, 300)
     resp = request({"type": "build initial", "asset": asset})
     scene = resp.get('scene')
-    down_arrow = resp['matches'].get('down arrow')
     if not scene:
         return
+    down_arrow = resp['matches'].get('down arrow')
     if resp['matches'] and asset in resp['matches']:
         click_location(resp['matches'][asset])
     elif down_arrow:

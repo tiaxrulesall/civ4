@@ -29,7 +29,7 @@ def handle_input(msg, scenes):
             adjusted_match = adjust_match(match, monitor, ss_bounds)
             return adjusted_match
     elif msg['type'] == 'build initial':
-        for scene_name in ['City Build']:
+        for scene_name in ['Start Turn', 'City Build']:
             scene = scenes[scene_name]
             ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=scene.bounds)
             initial_match = scene.find_initial_match(ss, msg['asset'])

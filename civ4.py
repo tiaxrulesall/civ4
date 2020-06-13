@@ -30,8 +30,9 @@ def start():
     proc = ThreadedProcessHandler(python, main, on_output=_on_message, cwd=main_dir)
 
 def stop():
+    global proc
     proc.kill()
-    print('c4stop')
+    proc = None
 
 def build(asset):
     mouse.move(300, 300)

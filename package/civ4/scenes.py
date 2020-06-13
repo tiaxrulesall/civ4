@@ -36,7 +36,7 @@ class StartTurnScene:
 
     def asset_to_filename(self, asset_name: str):
         asset_name_dash = '-'.join(asset_name.split())
-        return f'..\\assets\\start-turn-{asset_name_dash}.png'
+        return f'..\\assets\\{asset_name_dash}.png'
 
 class CityBuildScene:
 
@@ -55,7 +55,7 @@ class CityBuildScene:
 
     def asset_to_filename(self, asset_name: str):
         asset_name_dash = '-'.join(asset_name.split())
-        return f'..\\assets\\{asset_name_dash}.png'
+        return f'..\\assets\\city-{asset_name_dash}.png'
 
 def load_scenes():
     return {

@@ -15,6 +15,11 @@ def location_center(loc):
     y = loc['top'] + loc['height']//2
     return x, y
 
+def click_location(loc):
+    x, y = location_center(loc)
+    mouse.move(x, y)
+    mouse.click()
+
 def start():
     global proc
     root = str(pathlib.Path(__file__).absolute().parent)
@@ -36,18 +41,19 @@ def build(name):
     if not scene:
         return
     if resp['matches'] and name in resp['matches']:
-        center = location_center(resp['matches'][name])
-        mouse.move(center[0], center[1])
-        mouse.click()
+        click_location(resp['matches'][name])
     elif down_arrow:
-        print(down_arrow)
         downx, downy = location_center(down_arrow)
         if scene == 'Start Turn':
             mouse.move(downx, downy - 15)
-            mouse.click()
-            time.sleep(3)
-            resp = request({"type": "build", 'scene': scene, "asset": name})
-            print('aik', resp)
+            for i in range(10):
+                mouse.click()
+                time.sleep(0.1)
+                resp = request({"type": "build", 'scene': scene, "asset": name})
+                print('aik', resp)
+                if resp:
+                    click_location(resp)
+                    return
 
 
 def request(msg):

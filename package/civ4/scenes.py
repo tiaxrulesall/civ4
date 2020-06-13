@@ -26,10 +26,9 @@ class StartTurnScene:
         if asset_match:
             return {asset_name: asset_match}
         else:
-            return {
-                'up arrow': images.match_template_filename(img, self.asset_to_filename('up arrow')),
-                'down arrow': images.match_template_filename(img, self.asset_to_filename('down arrow')),
-            }
+            up_arrow_match = images.match_template_filename(img, self.asset_to_filename('up arrow')) 
+            down_arrow_match = images.match_template_filename(img, self.asset_to_filename('down arrow')) 
+            return {'up arrow': up_arrow_match, 'down arrow': down_arrow_match} if up_arrow_match and down_arrow_match else {} 
 
     def find_match(self, img, asset_name):
         return images.match_template_filename(img, self.asset_to_filename(asset_name))
@@ -40,18 +39,27 @@ class StartTurnScene:
 
 class CityBuildScene:
 
-    def bounds(self):
-        pass
+    def bounds(self, monitor):
+        # anchored to bottom
+        height = 130
+        bottom = monitor['top'] + monitor['height']
+        return {
+            **monitor,
+            'top': bottom - height,
+            'height': height,
+        }
 
     def find_initial_match(self, img, asset_name):
         asset_match = images.match_template_filename(img, self.asset_to_filename(asset_name))
         if asset_match:
             return {asset_name: asset_match}
         else:
-            return {
-            'up arrow': images.match_template_filename(img, self.asset_to_filename('up arrow')),
-            'down arrow': images.match_template_filename(img, self.asset_to_filename('down arrow')),
-        }
+            up_arrow_match = images.match_template_filename(img, self.asset_to_filename('up arrow')) 
+            down_arrow_match = images.match_template_filename(img, self.asset_to_filename('down arrow')) 
+            return {'up arrow': up_arrow_match, 'down arrow': down_arrow_match} if up_arrow_match and down_arrow_match else {} 
+
+    def find_match(self, img, asset_name):
+        return images.match_template_filename(img, self.asset_to_filename(asset_name))
 
     def asset_to_filename(self, asset_name: str):
         asset_name_dash = '-'.join(asset_name.split())

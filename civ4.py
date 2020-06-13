@@ -33,28 +33,31 @@ def stop():
     proc.kill()
     print('c4stop')
 
-def build(name):
-    mouse.move(9999, 9999)
-    resp = request({"type": "build initial", "asset": name})
+def build(asset):
+    mouse.move(300, 300)
+    resp = request({"type": "build initial", "asset": asset})
     scene = resp.get('scene')
     down_arrow = resp['matches'].get('down arrow')
     if not scene:
         return
-    if resp['matches'] and name in resp['matches']:
-        click_location(resp['matches'][name])
+    if resp['matches'] and asset in resp['matches']:
+        click_location(resp['matches'][asset])
     elif down_arrow:
         downx, downy = location_center(down_arrow)
         if scene == 'Start Turn':
             mouse.move(downx, downy - 15)
-            for i in range(10):
-                mouse.click()
-                time.sleep(0.1)
-                resp = request({"type": "build", 'scene': scene, "asset": name})
-                print('aik', resp)
-                if resp:
-                    click_location(resp)
-                    return
+        elif scene == 'City Build':
+            mouse.move(downx, downy)
+        scroll_and_click(scene, asset)
 
+def scroll_and_click(scene, asset):
+    for i in range(10):
+        mouse.click()
+        time.sleep(0.1)
+        resp = request({"type": "build", 'scene': scene, "asset": asset})
+        if resp:
+            click_location(resp)
+            return
 
 def request(msg):
     msg_id = str(uuid.uuid4())
@@ -68,8 +71,13 @@ def request(msg):
             time.sleep(0.01)
         resp = responses.get(msg_id)
     del responses[msg_id]
-    return resp
+    if 'error' in resp:
+        raise RuntimeError(resp['error'])
+    return resp['value']
 
 def _on_message(msg_str):
     msg = json.loads(msg_str)
-    responses[msg['id']] = msg['value']
+    if 'debug' in msg:
+        print(msg['debug'])
+    else:
+        responses[msg['id']] = msg

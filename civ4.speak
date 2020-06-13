@@ -15,18 +15,20 @@ edgeEast := east=[2000, 600]
 edgeSouth := south=[600, 2000]
 edgeWest := west=[0, 600]
 edges := <edgeNorth> | <edgeEast> | <edgeSouth> | <edgeWest>
-units := settler | worker | transport
-buildings := barracks | granary
-buildable := <units> | <buildings>
+units := airship | archer | axeman | bomber | catapult | chariot | maceman | pikeman | rifleman | settler | spearman | swordsman | transport | trebuchet | warrior | work boat | worker
+buildings := barracks | courthouse | forge | granary | library | university
+national_wonders := palace | (national park)
+world_wonders := (the pyramids) | stonehenge | shwedagon paya
+buildable := <units> | <buildings> | <national_wonders> | <world_wonders>
 
 build <buildable> = civ4.build($1)
 <literal_direction> [<number>] = {$1}~$2
 record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)
 play <letter> = macro.play($1)
-grid = state.grid.overlay() 
-move = state.grid.overlay(click=True) 
-gray text = setattr(state.grid 'font_color', [128,128,128]) 
+mouse grid = state.grid.overlay() 
+grid select = state.grid.overlay(click=True) 
+gray text = setattr(state.grid, 'font_color', [128,128,128]) 
 center mouse = mouseMove(centerPos()) 
 domestic advisor = {f1}
 financial advisor = {f2}
@@ -50,6 +52,10 @@ zoom out [<number>] = (mouse.wheel(-1) wait(.1))~$1
 toggle interface = {alt i}
 toggle world builder = {ctrl w}
 
+select same = {ctrl g} {esc}
+select all = {alt g} {esc}
+move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(click=True) 
+move all = mouse.move(300, 300) {alt g} state.grid.overlay(click=True) 
 go to = mouse.move(300, 300) g state.grid.overlay(click=True)
 route to = mouse.move(300, 300) {alt r}  state.grid.overlay(click=True)
 

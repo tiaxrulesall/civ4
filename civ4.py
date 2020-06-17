@@ -34,6 +34,9 @@ def stop():
     proc.kill()
     proc = None
 
+def scroll(direction):
+    pass
+
 def build(asset):
     mouse.move(300, 300)
     resp = request({"type": "build initial", "asset": asset})

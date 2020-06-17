@@ -20,7 +20,7 @@ def match_template_filename(img, template_filename):
 def match_template(img, template):
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    if max_val > 0.95:
+    if max_val > 0.9:
         left, top = max_loc
         width, height = template.shape[::-1]
         return {

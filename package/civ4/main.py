@@ -34,7 +34,7 @@ def handle_input(msg, scenes):
             ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=scene.bounds)
             try:
                 initial_match = scene.find_initial_match(ss, msg['asset'])
-            except RuntimeError:
+            except RuntimeError as e:
                 continue
             adjusted_matches = {k: adjust_match(v, monitor, ss_bounds) for k, v in initial_match.items()}
             if adjusted_matches:

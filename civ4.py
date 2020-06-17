@@ -51,6 +51,11 @@ def build(asset):
             mouse.move(downx, downy)
         scroll_and_click(scene, asset)
 
+def click_asset(scene, asset):
+    resp = request({"type": "build", 'scene': scene, "asset": asset})
+    if resp:
+        click_location(resp)
+
 def scroll_and_click(scene, asset):
     for i in range(10):
         mouse.click()

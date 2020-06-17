@@ -1,6 +1,6 @@
 priority() => 2
-is_active() => 'civ iv: beyond the sword'
 is_active() => true()
+is_active() => 'civ iv: beyond the sword'
 on_load() => extensions.register('civ4.civ4.py', 'civ4')
 on_activate() => setState(grid, screengrid.Grid()) keyboard.add_delay(/numkey\d/, 1) civ4.start()
 on_deactivate() => keyboard.remove_delay(/numkey\d/) print('civ 4 deactivate') civ4.stop()

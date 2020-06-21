@@ -4,11 +4,20 @@ import time
 import json
 import pathlib
 from communication.procs import ThreadedProcessHandler
-from recognition.actions.library import _mouse as mouse
+from recognition.actions.library import _mouse as mouse, window
 
 proc = None
 
 responses = {}
+
+def window_coords():
+    x, y, w, h = window.active_window().coords
+    return {'left': x, 'top': y, 'width': w, 'height': h}
+
+def window_to_absolute_coords(x, y):
+    win_coords = window.active_window().coords
+    winx, winy = win_coords[0], win_coords[1]
+    return winx + x, winy + y
 
 def location_center(loc):
     x = loc['left'] + loc['width']//2
@@ -34,12 +43,41 @@ def stop():
     proc.kill()
     proc = None
 
-def scroll(direction):
-    pass
+def scroll(direction, count=1):
+    try:
+        count = int(count)
+    except (ValueError, TypeError):
+        count = 1
+    if count < 1:
+        return
+    asset_name = f'{direction} arrow'
+    resp = request({"type": "build initial", "asset": asset_name})
+    match = resp['matches'].get(asset_name)
+    if not match:
+        return
+    x, y = location_center(match)
+    if  resp['scene'] == 'Start Turn':
+        y = y - 15 if direction == 'down' else y + 15
+    mouse.move(x, y)
+    for i in range(count):
+        mouse.click()
+
+def click_at(x, y):
+    winx, winy, winw, winh = window.active_window().coords
+    print(winw, winh)
+    clickx = x + winx
+    clicky = y + winy
+    if x < 0:
+        clickx += winw
+    if y < 0:
+        clicky += winh
+    mouse.move(clickx, clicky)
+    mouse.click()
 
 def build(asset):
+    win_coords = window_coords()
     mouse.move(300, 300)
-    resp = request({"type": "build initial", "asset": asset})
+    resp = request({"type": "build initial", "asset": asset, 'window_coords': win_coords})
     scene = resp.get('scene')
     if not scene:
         return
@@ -55,7 +93,8 @@ def build(asset):
         scroll_and_click(scene, asset)
 
 def click_asset(scene, asset):
-    resp = request({"type": "build", 'scene': scene, "asset": asset})
+    win_coords = window_coords()
+    resp = request({"type": "build", 'scene': scene, "asset": asset, 'window_coords': win_coords})
     if resp:
         click_location(resp)
 

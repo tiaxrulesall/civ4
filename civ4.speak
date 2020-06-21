@@ -15,14 +15,18 @@ edgeEast := east=[2000, 600]
 edgeSouth := south=[600, 2000]
 edgeWest := west=[0, 600]
 edges := <edgeNorth> | <edgeEast> | <edgeSouth> | <edgeWest>
-units := airship | archer | axeman | bomber | catapult | chariot | crossbowman | galley | longbowman | maceman | pikeman | rifleman | scout | settler | spearman | swordsman | transport | trebuchet | trireme | warrior | work boat | worker
-buildings := barracks | courthouse | forge | granary | jewish monastary | jewish temple | library | lighthouse | market | monument | theater | university | walls
+religion := christian | confucian | jewish | hindu | taoist
+special_units := <religion> missionary | scout | settler | spy | worker
+units := <special_units> | airship | archer | axeman | bomber | catapult | chariot | crossbowman | galley | longbowman | maceman | pikeman | rifleman | spearman | swordsman | transport | trebuchet | trireme | warrior | work boat
+religious_buildings := <religion> (temple | monastary)
+buildings := <religious_buildings> | barracks | courthouse | forge | granary | library | lighthouse | market | monument | theater | university | walls
 national_wonders := palace | national park | maoi statues
-world_wonders := (mausoleum [of mausollus])='mausoleum of mausollus' | stonehenge | shwedagon paya | the great lighthouse | the pyramids 
+world_wonders := (mausoleum of maw so law sis)='mausoleum of mausollus' | stonehenge | shwedagon paya | the great lighthouse | the pyramids 
 other_builables := wealth | research | culture
 buildable := <units> | <buildings> | <national_wonders> | <world_wonders> | <other_builables>
 improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f}
 
+a b c = print(window.active_window().coords)
 build <buildable> = civ4.build($1)
 examine city = civ4.click_asset('Start Turn', 'examine city')
 <literal_direction> [<number>] = {$1}~$2
@@ -54,6 +58,7 @@ zoom in [<number>] = (mouse.wheel(1) wait(.1))~$1
 zoom out [<number>] = (mouse.wheel(-1) wait(.1))~$1
 toggle interface = {alt i}
 toggle world builder = {ctrl w}
+scroll (up | down) [<number>] = civ4.scroll($1, $2)
 
 select same = {ctrl g} {esc}
 select all = {alt g} {esc}
@@ -77,9 +82,23 @@ fortify until healed = h
 
 nearest city = {ins}
 
-increase science [<number>] = mouse.move(80, 60) mouse.click()~$1
-reduce science [<number>] = mouse.move(100, 60) mouse.click()~$1
-increase culture [<number>] = mouse.move(80, 80) mouse.click()~$1
-reduce culture [<number>] = mouse.move(100, 80) mouse.click()~$1
-increase espionage [<number>] = mouse.move(80, 100) mouse.click()~$1
-reduce espionage [<number>] = mouse.move(100, 100) mouse.click()~$1
+increase (research | science) [<number>] = civ4.click_at(80, 60)
+reduce (research | science) [<number>] = civ4.click_at(100, 60)
+increase culture [<number>] = civ4.click_at(80, 80)
+reduce culture [<number>] = civ4.click_at(100, 80)
+increase espionage [<number>] = civ4.click_at(80, 100)
+reduce espionage [<number>] = civ4.click_at(100, 100)
+
+whip production = civ4.click_at(-270, -95)
+buy production = civ4.click_at(-235, -95)
+
+automate production | production automation = civ4.click_at(-270, -70)
+automate citizen | citizen automation = civ4.click_at(-235, -70)
+
+emphasize food = civ4.click_at(-275, -45)
+emphasize production = civ4.click_at(-255, -45)
+emphasize commerce = civ4.click_at(-235, -45)
+
+emphasize research = civ4.click_at(-275, -25)
+emphasize great person = civ4.click_at(-255, -25)
+avoid growth = civ4.click_at(-235, -25)

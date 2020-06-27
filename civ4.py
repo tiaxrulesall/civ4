@@ -73,11 +73,16 @@ def click_at(x, y):
         clicky += winh
     mouse.move(clickx, clicky)
     mouse.click()
-
+# {"type": "match", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
 def build(asset):
     win_coords = window_coords()
     mouse.move(300, 300)
-    resp = request({"type": "build initial", "asset": asset, 'window_coords': win_coords})
+    validation_assets = ("up arrow", "down arrow")
+    req = {"type": "match", "assets": []}
+    for scene in ('Start Turn Build', 'City Build'):
+        asset_collection = {'scene': scene, "validation assets": validation_assets, 'assets': [] if asset in validation_assets else [asset]}
+        req['assets'].append(asset_collection)
+    resp = request(req)
     scene = resp.get('scene')
     if not scene:
         return
@@ -94,17 +99,19 @@ def build(asset):
 
 def click_asset(scene, asset):
     win_coords = window_coords()
-    resp = request({"type": "build", 'scene': scene, "asset": asset, 'window_coords': win_coords})
+    req = {"type": "match", "assets": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
+    resp = request(req)
     if resp:
         click_location(resp)
+        return True
+    return False
 
 def scroll_and_click(scene, asset):
     for i in range(10):
         mouse.click()
         time.sleep(0.1)
-        resp = request({"type": "build", 'scene': scene, "asset": asset})
-        if resp:
-            click_location(resp)
+        success = click_asset(scene, asset)
+        if success:
             return
 
 def request(msg):

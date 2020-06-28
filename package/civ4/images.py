@@ -59,3 +59,19 @@ def screenshot_from_file(filename, bounds_fn=None):
     ss_bounds = bounds_fn(bounds) if bounds_fn else bounds
     crop_img = img[ss_bounds['top']: ss_bounds['top'] + ss_bounds['height'], ss_bounds['left']: ss_bounds['left'] + ss_bounds['width']]
     return crop_img, bounds, ss_bounds
+
+def match_template_multiple(img, template):
+    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.9
+    matches = []
+    # fake out max_val for first run through loop
+    max_val = 1
+    while max_val > threshold:
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        if max_val > threshold:
+            left, top = max_loc
+            width, height = template.shape[::-1]
+            matches.append({'top': top, 'left': left, 'height': height, 'width': width})
+            res[max_loc[1]-height//2:max_loc[1]+height//2+1, max_loc[0]-width//2:max_loc[0]+width//2+1] = 0   
+            img = cv2.rectangle(img, (max_loc[0],max_loc[1]), (max_loc[0]+width+1, max_loc[1]+height+1), (0,255,0) )
+    return matches

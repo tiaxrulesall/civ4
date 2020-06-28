@@ -32,10 +32,12 @@ world_wonders := (mausoleum of maw so law sis)='mausoleum of mausollus' | stoneh
 other_builables := wealth | research | culture
 buildable := <units> | <buildings> | <national_wonders> | <world_wonders> | <other_builables>
 improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f}
+promotions := (combat 1)='combat i' | (combat 2)='combat ii'
 
 a b c = print(window.active_window().coords)
+promote <promotions> = civ4.click_asset('Promotions', $1)
 build <buildable> = civ4.build($1)
-examine city = civ4.click_asset('Start Turn', 'examine city')
+examine city = civ4.click_asset('Start Turn Build', 'examine city')
 <literal_direction> [<number>] = {$1}~$2
 record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)

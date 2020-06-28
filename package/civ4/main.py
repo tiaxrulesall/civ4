@@ -21,17 +21,10 @@ def adjust_match(match, img, cropped):
         'top': match['top'] + cropped['top'],
     }
 
-def handle_input(msg, scenes):
+def handle_input(msg):
     monitor_num = 1
-    if msg['type'] == 'build':
-        scene = scenes[msg['scene']]
-        ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=scene.bounds)
-        match = scene.find_match(ss, msg['asset'])
-        if match:
-            adjusted_match = adjust_match(match, monitor, ss_bounds)
-            return adjusted_match
-    elif msg['type'] == 'match':
-        matched_scene = None
+    if msg['type'] == 'match':
+        match_fn = images.match_template if not msg.get('multiple') else images.match_template_multiple
         for asset_collection in msg['assets']:
             matches = {}
             bounds_fn = get_bounds_fn(asset_collection['scene'])
@@ -44,29 +37,22 @@ def handle_input(msg, scenes):
             if validation_assets:
                 for asset in validation_assets:
                     asset_path = get_asset_path(asset_collection['scene'], asset)
-                    match = images.match_template_filename(ss, asset_path)
+                    template = images.get_asset_image(asset_path)
+                    match = match_fn(ss, template)
                     if match:
                         matches[asset] = match
-            if not matches:
-                continue
+                if not matches:
+                    continue
             for asset in asset_collection['assets']:
                 asset_path = get_asset_path(asset_collection['scene'], asset)
-                match = images.match_template_filename(ss, asset_path)
+                template = images.get_asset_image(asset_path)
+                match = match_fn(ss, template)
                 if match:
                     matches[asset] = match
-            adjusted_matches = {k: adjust_match(v, monitor, ss_bounds) for k, v in matches.items()}
+            adjusted_matches = {}
+            for asset, match in matches.items():
+                adjusted_matches[asset] = [adjust_match(x, monitor, ss_bounds) for x in match] if isinstance(match, list) else adjust_match(match, monitor, ss_bounds)
             return {'scene': asset_collection['scene'], 'matches': adjusted_matches}
-    elif msg['type'] == 'build initial':
-        for scene_name in ['Start Turn Build', 'City Build']:
-            scene = scenes[scene_name]
-            ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=scene.bounds)
-            try:
-                initial_match = scene.find_initial_match(ss, msg['asset'])
-            except RuntimeError as e:
-                continue
-            adjusted_matches = {k: adjust_match(v, monitor, ss_bounds) for k, v in initial_match.items()}
-            if adjusted_matches:
-                return {'scene': scene_name, 'matches': adjusted_matches}
     return {}
 
 def debug(msg):
@@ -74,15 +60,18 @@ def debug(msg):
 
 def get_bounds_fn(scene: str):
     return {
+        'City Build': regions.bottom,
+        'Promotions': regions.bottom,
         'Start Turn Build': regions.start_turn_menu,
         'Start Turn Research': regions.start_turn_menu,
-        'City Build': regions.bottom,
-    }[scene]
+    }.get(scene, lambda x: x.copy())
 
 def get_asset_path(scene, asset_name):
     root = os.path.join('..', 'assets')
     asset_folder = {
         'City Build': 'city-build',
+        'Custom Game': 'custom-game',
+        'Promotions': 'promotions',
         'Start Turn Build': 'start-turn-build',
     }[scene]
     asset_file_name = f"{'-'.join(asset_name.split())}.png"
@@ -90,7 +79,6 @@ def get_asset_path(scene, asset_name):
 
 
 def main():
-    scenes = _scenes.load_scenes()
     while True:
         stdin = input()
         if not stdin:
@@ -98,7 +86,7 @@ def main():
         else:
             msg = json.loads(stdin)
             try:
-                resp = handle_input(msg, scenes)
+                resp = handle_input(msg)
             except Exception as e:
                 err = traceback.format_exc()
                 print(json.dumps({'id': msg['id'], 'error': err}))
@@ -112,3 +100,4 @@ main()
 {"type": "build initial", "asset": "settler", "id": "abc"}
 {"type": "match", "screenshot": "startturnhighres.png", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
 {"type": "match", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
+{"type": "match", "screenshot": "custom-game-multi.png", "multiple": true, "assets": [{"scene": "Custom Game", "assets": ["top option selector"]}], "id": "abc"}

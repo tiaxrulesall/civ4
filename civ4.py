@@ -1,4 +1,5 @@
 import os
+import operator
 import uuid
 import time
 import json
@@ -56,7 +57,7 @@ def scroll(direction, count=1):
     if not match:
         return
     x, y = location_center(match)
-    if  resp['scene'] == 'Start Turn':
+    if  resp['scene'] == 'Start Turn Build':
         y = y - 15 if direction == 'down' else y + 15
     mouse.move(x, y)
     for i in range(count):
@@ -74,6 +75,7 @@ def click_at(x, y):
     mouse.move(clickx, clicky)
     mouse.click()
 # {"type": "match", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
+
 def build(asset):
     win_coords = window_coords()
     mouse.move(300, 300)
@@ -102,7 +104,7 @@ def click_asset(scene, asset):
     req = {"type": "match", "assets": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
     resp = request(req)
     if resp:
-        click_location(resp)
+        click_location(resp['matches'][asset])
         return True
     return False
 
@@ -113,6 +115,29 @@ def scroll_and_click(scene, asset):
         success = click_asset(scene, asset)
         if success:
             return
+
+def select_custom_game_player_option(row_idx, col_idx):
+    req = {"type": "match", "multiple": True, "assets": [{"scene": "Custom Game", "assets": ["top option selector"]}]}
+    resp = request(req)
+    if not resp:
+        return
+    win_coords = window_coords()
+    sorted_matches = sorted(resp['matches']['top option selector'], key=operator.itemgetter('top', 'left'))
+    rows = [[sorted_matches[0]]]
+    heights = [sorted_matches[0]['top']]
+    for match in sorted_matches[1:]:
+        if match['top'] != rows[-1][-1]['top']:
+            rows.append([])
+        rows[-1].append(match)
+    if row_idx == 0:
+        win_coords = window_coords()
+        is_first_row = len(rows[0]) == 4 and rows[0][-1]['left'] + 200 > win_coords['width']
+        if is_first_row:
+            if col_idx == 0:
+                raise RuntimeError('Cannot select player')
+            col_idx -= 1
+    match = rows[row_idx][col_idx]
+    click_location(match)
 
 def request(msg):
     msg_id = str(uuid.uuid4())

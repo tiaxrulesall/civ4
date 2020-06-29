@@ -30,6 +30,12 @@ def click_location(loc):
     mouse.move(x, y)
     mouse.click()
 
+def poll_scene():
+    start_proc = proc
+    req = {'type':2, 'match': 1 }
+    while proc is start_proc:
+        time.sleep(5)
+
 def start():
     global proc
     root = str(pathlib.Path(__file__).absolute().parent)
@@ -51,12 +57,14 @@ def scroll(direction, count=1):
         count = 1
     if count < 1:
         return
+    mouse.move(300, 300)
     asset_name = f'{direction} arrow'
-    resp = request({"type": "build initial", "asset": asset_name})
-    match = resp['matches'].get(asset_name)
-    if not match:
+    req = {"type": "match", "assets": [{'scene': 'Start Turn Build', 'assets': [asset_name]}, {'scene': 'City Build', 'assets': [asset_name]}]}
+    resp = request(req)
+    print(resp)
+    if not resp:
         return
-    x, y = location_center(match)
+    x, y = location_center(resp['matches'][asset_name])
     if  resp['scene'] == 'Start Turn Build':
         y = y - 15 if direction == 'down' else y + 15
     mouse.move(x, y)
@@ -161,3 +169,8 @@ def _on_message(msg_str):
         print(msg['debug'])
     else:
         responses[msg['id']] = msg
+
+_SCENE_VALIDATION = {
+    # 'Start Turn Build': ('up arrow', 'down arrow')
+    # 'City Build': ('up arrow', 'down arrow')
+}

@@ -6,15 +6,11 @@ import os.path
 from matplotlib import pyplot as plt
 import mss
 import time
-import scenes as _scenes
 import images
 import regions
 import mss
 
 def adjust_match(match, img, cropped):
-    # print(match)
-    # print(img)
-    # print(cropped)
     return {
         **match,
         'left': match['left'] + cropped['left'],

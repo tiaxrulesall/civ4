@@ -43,7 +43,7 @@ def handle_input(msg):
                         matches[asset] = match
             if not matches and validation_assets:
                 continue
-            for asset in asset_collection['assets']:
+            for asset in asset_collection.get('assets', []):
                 asset_path = get_asset_path(asset_collection['scene'], asset)
                 template = images.get_asset_image(asset_path)
                 match = match_fn(ss, template)
@@ -54,8 +54,6 @@ def handle_input(msg):
                 for asset, match in matches.items():
                     adjusted_matches[asset] = [adjust_match(x, monitor, ss_bounds) for x in match] if isinstance(match, list) else adjust_match(match, monitor, ss_bounds)
                 return {'scene': asset_collection['scene'], 'matches': adjusted_matches}
-    elif msg['type'] == 'state':
-        pass
     return {}
 
 def debug(msg):

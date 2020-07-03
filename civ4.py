@@ -1,13 +1,16 @@
 import os
+import threading
 import operator
 import uuid
 import time
 import json
+from types import SimpleNamespace
 import pathlib
 from communication.procs import ThreadedProcessHandler
-from recognition.actions.library import _mouse as mouse, window
+from recognition.actions.library import _mouse as mouse, window, stdlib
 
-proc = None
+def proc():
+    return stdlib.namespace['state'].civ4['proc']
 
 responses = {}
 
@@ -30,25 +33,42 @@ def click_location(loc):
     mouse.move(x, y)
     mouse.click()
 
-def poll_scene():
-    start_proc = proc
-    req = {'type':2, 'match': 1 }
-    while proc is start_proc:
-        time.sleep(5)
+def poll_scene(start_proc):
+    custom_game = {'scene': 'Custom Game', 'validation assets': ['victories']}
+    req = {
+        'type': 'match',
+        'assets': [
+            custom_game
+        ]
+    }
+    while True:
+        try:
+            current_proc = proc()
+        except AttributeError:
+            return
+        if current_proc is not start_proc:
+            return
+        resp = request(req)
+        if resp:
+            stdlib.namespace['state'].civ4.update({'scene': resp['scene'], 'matches': resp['matches']})
+        else:
+            stdlib.namespace['state'].civ4.update({'scene': None, 'matches': []})
+        # print(stdlib.namespace['state'].civ4)
+        time.sleep(2)
 
 def start():
-    global proc
     root = str(pathlib.Path(__file__).absolute().parent)
     package_root = os.path.join(root, 'package')
     python = os.path.join(package_root, 'scripts', 'python.exe')
     main_dir = os.path.join(package_root, 'civ4')
     main = os.path.join(main_dir, 'main.py')
     proc = ThreadedProcessHandler(python, main, on_output=_on_message, cwd=main_dir)
+    stdlib.namespace['state'].civ4 = {'proc': proc, 'scene': None, 'matches': []}
+    threading.Thread(target=poll_scene, args=(proc,)).start()
 
 def stop():
-    global proc
-    proc.kill()
-    proc = None
+    proc().kill()
+    del stdlib.namespace['state'].civ4
 
 def scroll(direction, count=1):
     try:
@@ -108,13 +128,18 @@ def build(asset):
         scroll_and_click(scene, asset)
 
 def click_asset(scene, asset):
+    loc = find_asset(scene, asset)
+    if loc:
+        click_location(loc)
+        return True
+    return False
+
+def find_asset(scene, asset):
     win_coords = window_coords()
     req = {"type": "match", "assets": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
     resp = request(req)
     if resp:
-        click_location(resp['matches'][asset])
-        return True
-    return False
+        return resp['matches'][asset]
 
 def scroll_and_click(scene, asset):
     for i in range(10):
@@ -151,7 +176,7 @@ def request(msg):
     msg_id = str(uuid.uuid4())
     msg_with_id = {'id': msg_id, **msg}
     msg_str = json.dumps(msg_with_id)
-    proc.send_message(msg_str)
+    proc().send_message(msg_str)
     resp = None
     start = time.time()
     while resp is None:

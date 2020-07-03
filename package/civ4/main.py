@@ -20,7 +20,8 @@ def adjust_match(match, img, cropped):
 def handle_input(msg):
     monitor_num = 1
     if msg['type'] == 'match':
-        match_fn = images.match_template if not msg.get('multiple') else images.match_template_multiple
+        multiple = msg.get('multiple', False)
+        match_fn = images.match_template if not multiple else images.match_template_multiple
         for asset_collection in msg['assets']:
             matches = {}
             bounds_fn = get_bounds_fn(asset_collection['scene'])

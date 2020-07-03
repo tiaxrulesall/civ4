@@ -34,7 +34,7 @@ def click_location(loc):
     mouse.click()
 
 def poll_scene(start_proc):
-    custom_game = {'scene': 'Custom Game', 'validation assets': ['victories']}
+    custom_game = {'scene': 'Custom Game', 'validation assets': ['pane slider']}
     req = {
         'type': 'match',
         'assets': [
@@ -70,7 +70,43 @@ def stop():
     proc().kill()
     del stdlib.namespace['state'].civ4
 
+def scene_match_skeleton(scene):
+    if scene == 'Custom Game':
+        validation_assets = ['pane slider'] 
+    else:
+        validation_assets = []
+    return {'scene': scene, 'validation assets': validation_assets}
+
+def add_ai():
+    req = {"type": "match", "assets": [{**scene_match_skeleton('Custom Game'), 'assets': ['open', 'closed']}]}
+
+
+
+def custom_game_scroll(direction, menu, count=1):
+    count = parse_number(count)
+    mouse.move(0, 0)
+    x, y = custom_game_scroll_location(direction, menu)
+    mouse.move(x, y)
+    for i in range(count):
+        mouse.click()
+
+def custom_game_scroll_location(direction, menu):
+    asset_name = f'{direction} arrow'
+    req = {"type": "match", 'multiple': True, "assets": [{**scene_match_skeleton('Custom Game'), 'assets': [asset_name]}]}
+    resp = request(req)
+    if not resp:
+        return
+    matches = resp['matches'][asset_name]
+    if len(matches) == 2:
+        loc = matches[0] if menu == 'top' else matches[1]
+    x, y = location_center(loc)
+    y_adjustment = 0
+    if menu == 'bottom':
+        y_adjustment = 12 if direction == 'up' else -12
+    return x, y + y_adjustment
+
 def scroll(direction, count=1):
+    count = parse_number(count)
     try:
         count = int(count)
     except (ValueError, TypeError):
@@ -93,7 +129,6 @@ def scroll(direction, count=1):
 
 def click_at(x, y):
     winx, winy, winw, winh = window.active_window().coords
-    print(winw, winh)
     clickx = x + winx
     clicky = y + winy
     if x < 0:
@@ -150,15 +185,15 @@ def scroll_and_click(scene, asset):
             return
 
 def select_custom_game_player_option(row_idx, col_idx):
-    req = {"type": "match", "multiple": True, "assets": [{"scene": "Custom Game", "assets": ["top option selector"]}]}
+    req = {"type": "match", "multiple": True, "assets": [{**scene_match_skeleton('Custom Game'), "assets": ["top option selector"]}]}
     resp = request(req)
     if not resp:
         return
     win_coords = window_coords()
-    sorted_matches = sorted(resp['matches']['top option selector'], key=operator.itemgetter('top', 'left'))
-    rows = [[sorted_matches[0]]]
-    heights = [sorted_matches[0]['top']]
-    for match in sorted_matches[1:]:
+    matches = resp['matches']['top option selector']
+    rows = [[matches[0]]]
+    heights = [matches[0]['top']]
+    for match in matches[1:]:
         if match['top'] != rows[-1][-1]['top']:
             rows.append([])
         rows[-1].append(match)
@@ -171,6 +206,12 @@ def select_custom_game_player_option(row_idx, col_idx):
             col_idx -= 1
     match = rows[row_idx][col_idx]
     click_location(match)
+
+def parse_number(n, default=1):
+    try:
+        return int(n)
+    except (ValueError, TypeError):
+        return default
 
 def request(msg):
     msg_id = str(uuid.uuid4())

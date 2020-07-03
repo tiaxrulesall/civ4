@@ -1,4 +1,5 @@
 import time
+import operator
 import numpy
 import cv2
 import mss
@@ -74,4 +75,4 @@ def match_template_multiple(img, template):
             matches.append({'top': top, 'left': left, 'height': height, 'width': width})
             res[max_loc[1]-height//2:max_loc[1]+height//2+1, max_loc[0]-width//2:max_loc[0]+width//2+1] = 0   
             img = cv2.rectangle(img, (max_loc[0],max_loc[1]), (max_loc[0]+width+1, max_loc[1]+height+1), (0,255,0) )
-    return matches
+    return sorted(matches, key=operator.itemgetter('top', 'left'))

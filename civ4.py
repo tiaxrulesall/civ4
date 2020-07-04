@@ -7,7 +7,7 @@ import json
 from types import SimpleNamespace
 import pathlib
 from communication.procs import ThreadedProcessHandler
-from recognition.actions.library import _mouse as mouse, window, stdlib
+from recognition.actions.library import _mouse as mouse, window, stdlib, _keyboard as keyboard
 
 def proc():
     return stdlib.namespace['state'].civ4['proc']
@@ -77,18 +77,41 @@ def scene_match_skeleton(scene):
         validation_assets = []
     return {'scene': scene, 'validation assets': validation_assets}
 
+def get_match_from_response(asset, resp):
+    try:
+        return resp['matches'][asset]
+    except KeyError:
+        pass
+
 def add_ai():
+    match = custom_game_scroll('down', 'top', check_fn=check_ai, count=18)
+    if match:
+        click_location(match)
+        for i in range(2):
+            keyboard.KeyPress.from_space_delimited_string('down').send()
+        keyboard.KeyPress.from_space_delimited_string('up').send()
+        keyboard.KeyPress.from_space_delimited_string('enter').send()
+
+def check_ai():
     req = {"type": "match", "assets": [{**scene_match_skeleton('Custom Game'), 'assets': ['open', 'closed']}]}
+    resp = request(req)
+    return get_match_from_response('open', resp) or get_match_from_response('closed', resp)
 
-
-
-def custom_game_scroll(direction, menu, count=1):
+def custom_game_scroll(direction, menu, check_fn=lambda: False, count=1):
+    check_result = check_fn()
+    if check_result:
+        return check_result
     count = parse_number(count)
     mouse.move(0, 0)
     x, y = custom_game_scroll_location(direction, menu)
     mouse.move(x, y)
     for i in range(count):
         mouse.click()
+        time.sleep(0.1)
+        check_result = check_fn()
+        if check_result:
+            return check_result
+
 
 def custom_game_scroll_location(direction, menu):
     asset_name = f'{direction} arrow'

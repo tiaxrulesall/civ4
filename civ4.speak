@@ -16,25 +16,26 @@ edgeSouth := south=[600, 2000]
 edgeWest := west=[0, 600]
 edges := <edgeNorth> | <edgeEast> | <edgeSouth> | <edgeWest>
 religion := buddhist | christian | confucian | jewish | hindu | islamic | taoist
-air_units := airship | bomber | fighter | jet fighter | skirmisher | stealth bomber
+armored_unit := modern armor | panzer | tank
+air_units := airship | bomber | fighter | gunship | jet fighter | skirmisher | stealth bomber
 archer_units := archer | bowman | (cho ko new)='cho-ko-nu' | crossbowman | longbowman
-gunpowder_units := infantry | ((mech | mechanized)=mechanized) infantry | musketman | rifleman | samurai
-melee_units := axeman | maceman | (catch you a)=quechua | pikeman | spearman | swordsman | warrior
-mounted_units := cavalry | chariot | horse archer | knight | war elephant
-naval_units := galley | transport | trireme | work boat
-siege_units := artillery | catapult | cannon | trebuchet
-special_units := <religion> missionary | scout | settler | spy | worker
-units := <air_units> | <archer_units> | <gunpowder_units> | <melee_units> | <mounted_units> | <naval_units> | <siege_units> | <special_units>
-religious_buildings := <religion> (temple | monastary)
-buildings := <religious_buildings> | barracks | courthouse | forge | granary | library | lighthouse | market | monument | theater | university | walls
-national_wonders := palace | national park | maoi statues
-world_wonders := (mausoleum of maw so law sis)='mausoleum of mausollus' | stonehenge | shwedagon paya | the great lighthouse | the pyramids 
-other_builables := wealth | research | culture
-buildable := <units> | <buildings> | <national_wonders> | <world_wonders> | <other_builables>
+gunpowder_units := grenadier | infantry | machine gun | ((mech | mechanized)=mechanized) infantry | musketman | rifleman
+melee_units := axeman | maceman | (catch you a)=quechua | pikeman | samurai | spearman | swordsman | warrior
+mounted_unit := cavalry | chariot | horse archer | immortal | knight | war elephant
+naval_unit := destroyer | galley | transport | trireme | work boat
+siege_unit := artillery | catapult | cannon | mobile artillery | trebuchet
+special_unit := <religion> missionary | scout | settler | spy | worker
+unit := <air_units> | <archer_units> | <armored_unit> | <gunpowder_units> | <melee_units> | <mounted_unit> | <naval_unit> | <siege_unit> | <special_unit>
+religious_building := <religion> (temple | monastary)
+building := <religious_building> | barracks | courthouse | forge | granary | library | lighthouse | market | monument | theater | university | walls
+national_wonder := palace | national park | maoi statues
+world_wonder := (mausoleum of maw so law sis)='mausoleum of mausollus' | stonehenge | shwedagon paya | the great lighthouse | the pyramids 
+other_builable := wealth | research | culture
+buildable := <unit> | <building> | <national_wonder> | <world_wonder> | <other_builable>
 improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f}
-promotions := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (woodsman 1)='woodsman i'
+promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (woodsman 1)='woodsman i'
 
-promote <promotions> = civ4.click_asset('Promotions', $1)
+promote <promotion> = civ4.click_asset('Promotions', $1)
 build <buildable> = civ4.build($1)
 examine city = civ4.click_asset('Start Turn Build', 'examine city')
 <literal_direction> [<number>] = {$1}~$2
@@ -70,6 +71,11 @@ scroll (up | down) [<number>] = civ4.scroll($1, $2)
 
 select same = {ctrl g} {esc}
 select all = {alt g} {esc}
+focus <unit> [<number>] = civ4.focus_unit($1, parse_int($2))
+focus <unit> <number> through <number> = civ4.focus_unit($1, parse_int($2), parse_int($3))
+select <unit> [<number>] = civ4.select_unit($1, parse_int($2))
+select <unit> <number> through <number> = civ4.select_unit($1, parse_int($2), parse_int($3))
+
 move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(click=True) 
 move all = mouse.move(300, 300) {alt g} state.grid.overlay(click=True) 
 go to = mouse.move(300, 300) g state.grid.overlay(click=True)

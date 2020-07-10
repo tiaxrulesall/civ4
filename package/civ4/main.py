@@ -71,6 +71,7 @@ def get_asset_path(scene, asset_name):
         'Custom Game': 'custom-game',
         'Promotions': 'promotions',
         'Start Turn Build': 'start-turn-build',
+        'Unit Selection': 'start-turn-build',
     }[scene]
     asset_file_name = f"{'-'.join(asset_name.split())}.png"
     return os.path.join(root, asset_folder, asset_file_name)

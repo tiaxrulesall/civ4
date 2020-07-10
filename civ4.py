@@ -1,4 +1,5 @@
 import os
+import functools
 import threading
 import operator
 import uuid
@@ -160,6 +161,49 @@ def click_at(x, y):
         clicky += winh
     mouse.move(clickx, clicky)
     mouse.click()
+
+def focus_unit(unit_asset, from_idx, to_idx=None):
+    _focus_or_select_unit(unit_asset, from_idx, to_idx, False)
+
+def select_unit(unit_asset, from_idx, to_idx=None):
+    _focus_or_select_unit(unit_asset, from_idx, to_idx, True)
+
+def _focus_or_select_unit(unit_asset, from_num, to_num, do_select):
+    req = {"type": "match", 'multiple': True, "assets": [{**scene_match_skeleton('Unit Selection'), 'assets': [unit_asset]}]}
+    resp = request(req)
+    if not resp['matches']:
+        return
+    locs = [location_center(x) for x in _normalize_rows(resp['matches'][unit_asset])]
+    shift_pressed = False
+    if do_select:
+        keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
+        shift_pressed = True
+    from_idx = _num_to_index(from_num, locs)
+    click_at(*locs[from_idx])
+    time.sleep(0.1)
+    if to_num not in (None, 0):
+        to_idx = _num_to_index(to_num, locs)
+        for x, y in locs[from_idx + 1: to_idx + 1]:
+            if not shift_pressed:
+                keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
+                shift_pressed = True
+            time.sleep(0.1)
+            click_at(x, y)
+            time.sleep(0.1)
+    if shift_pressed:
+        time.sleep(0.1)
+        keyboard.KeyPress.from_space_delimited_string('shift_release').send()
+
+def _normalize_rows(locations):
+    return sorted(locations, key=functools.cmp_to_key(location_comparison))
+
+def _num_to_index(num, collection):
+    if not num:
+        return num
+    if num < 0:
+        return len(collection) - 1
+    return num - 1
+
 # {"type": "match", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
 
 def build(asset):
@@ -263,3 +307,13 @@ _SCENE_VALIDATION = {
     # 'Start Turn Build': ('up arrow', 'down arrow')
     # 'City Build': ('up arrow', 'down arrow')
 }
+
+def location_comparison(loc_a, loc_b):
+    acmp = loc_a['top'], loc_a['left']
+    bcmp = loc_b['top'], loc_b['left']
+    if acmp == bcmp:
+        return 0
+    threshold = 5
+    if abs(acmp[0] - bcmp[0]) < threshold:
+        acmp, bcmp = acmp[1], bcmp[1]
+    return 1 if acmp > bcmp else -1

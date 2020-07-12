@@ -23,3 +23,6 @@ scroll (up | down) [<number>] = civ4.custom_game_scroll($1, 'top', count=$2)
 (setting | settings) scroll (up | down) [<number>] = civ4.custom_game_scroll($2, 'bottom', count=$3)
 add ai [<number>] = civ4.add_ai()~$1
 launch [game] | start game = civ4.click_at(-100, -20)
+
+(settings | setting) <number> = civ4.custom_game_setting(int($2))
+bottom (settings | setting) <number> = civ4.custom_game_setting(-int($2))

@@ -62,6 +62,7 @@ def get_bounds_fn(scene: str):
         'Promotions': regions.bottom,
         'Start Turn Build': regions.start_turn_menu,
         'Start Turn Research': regions.start_turn_menu,
+        'Unit Commands': regions.bottom,
     }.get(scene, lambda x: x.copy())
 
 def get_asset_path(scene, asset_name):
@@ -69,7 +70,8 @@ def get_asset_path(scene, asset_name):
     asset_folder = {
         'City Build': 'city-build',
         'Custom Game': 'custom-game',
-        'Promotions': 'promotions',
+        'Promotions': 'unit-commands',
+        'Unit Commands': 'unit-commands',
         'Start Turn Build': 'start-turn-build',
         'Unit Selection': 'start-turn-build',
     }[scene]

@@ -103,7 +103,6 @@ def custom_game_scroll(direction, menu, check_fn=lambda: False, count=1):
     if check_result:
         return check_result
     count = parse_number(count)
-    mouse.move(0, 0)
     x, y = custom_game_scroll_location(direction, menu)
     mouse.move(x, y)
     for i in range(count):
@@ -137,7 +136,6 @@ def scroll(direction, count=1):
         count = 1
     if count < 1:
         return
-    mouse.move(300, 300)
     asset_name = f'{direction} arrow'
     req = {"type": "match", "assets": [{'scene': 'Start Turn Build', 'assets': [asset_name]}, {'scene': 'City Build', 'assets': [asset_name]}]}
     resp = request(req)
@@ -162,13 +160,7 @@ def click_at(x, y):
     mouse.move(clickx, clicky)
     mouse.click()
 
-def focus_unit(unit_asset, from_idx, to_idx=None):
-    _focus_or_select_unit(unit_asset, from_idx, to_idx, False)
-
-def select_unit(unit_asset, from_idx, to_idx=None):
-    _focus_or_select_unit(unit_asset, from_idx, to_idx, True)
-
-def _focus_or_select_unit(unit_asset, from_num, to_num, do_select):
+def focus_unit(unit_asset, from_num, to_num, do_select):
     req = {"type": "match", 'multiple': True, "assets": [{**scene_match_skeleton('Unit Selection'), 'assets': [unit_asset]}]}
     resp = request(req)
     if not resp['matches']:
@@ -179,17 +171,20 @@ def _focus_or_select_unit(unit_asset, from_num, to_num, do_select):
         keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
         shift_pressed = True
     from_idx = _num_to_index(from_num, locs)
+    to_idx = _num_to_index(to_num, locs)
+    if to_idx is not None:
+        from_idx, to_idx = sorted((from_idx, to_idx))
+    else:
+        to_idx = from_idx + 1
     click_at(*locs[from_idx])
     time.sleep(0.1)
-    if to_num not in (None, 0):
-        to_idx = _num_to_index(to_num, locs)
-        for x, y in locs[from_idx + 1: to_idx + 1]:
-            if not shift_pressed:
-                keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
-                shift_pressed = True
-            time.sleep(0.1)
-            click_at(x, y)
-            time.sleep(0.1)
+    for x, y in locs[from_idx + 1: to_idx + 1]:
+        if not shift_pressed:
+            keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
+            shift_pressed = True
+        time.sleep(0.1)
+        click_at(x, y)
+        time.sleep(0.1)
     if shift_pressed:
         time.sleep(0.1)
         keyboard.KeyPress.from_space_delimited_string('shift_release').send()
@@ -201,14 +196,13 @@ def _num_to_index(num, collection):
     if not num:
         return num
     if num < 0:
-        return len(collection) - 1
+        return len(collection) + num
     return num - 1
 
 # {"type": "match", "assets": [{"scene": "Start Turn Build", "validation assets": ["up arrow", "down arrow"], "assets": ["settler"]}], "id": "abc"}
 
 def build(asset):
     win_coords = window_coords()
-    mouse.move(300, 300)
     validation_assets = ("up arrow", "down arrow")
     req = {"type": "match", "assets": []}
     for scene in ('Start Turn Build', 'City Build'):
@@ -228,6 +222,14 @@ def build(asset):
         elif scene == 'City Build':
             mouse.move(downx, downy)
         scroll_and_click(scene, asset)
+
+def custom_game_setting(num):
+    req = {'type': 'match', 'assets': [{**scene_match_skeleton('Custom Game'), 'assets': ['settings-selector']}], 'multiple': True}
+    resp = request(req)
+    matches = resp['matches']['settings-selector']
+    idx = _num_to_index(num, matches)
+    click_location(matches[idx])
+    print(resp)
 
 def click_asset(scene, asset):
     loc = find_asset(scene, asset)
@@ -311,9 +313,9 @@ _SCENE_VALIDATION = {
 def location_comparison(loc_a, loc_b):
     acmp = loc_a['top'], loc_a['left']
     bcmp = loc_b['top'], loc_b['left']
-    if acmp == bcmp:
-        return 0
     threshold = 5
     if abs(acmp[0] - bcmp[0]) < threshold:
         acmp, bcmp = acmp[1], bcmp[1]
+    if acmp == bcmp:
+        return 0
     return 1 if acmp > bcmp else -1

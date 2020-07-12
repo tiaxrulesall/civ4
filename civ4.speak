@@ -36,6 +36,8 @@ improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | 
 promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (woodsman 1)='woodsman i'
 
 promote <promotion> = civ4.click_asset('Promotions', $1)
+create group | creates a group = civ4.click_asset('Unit Commands', 'creates a group')
+separate group | separates the group = civ4.click_asset('Unit Commands', 'separates the group')
 build <buildable> = civ4.build($1)
 examine city = civ4.click_asset('Start Turn Build', 'examine city')
 <literal_direction> [<number>] = {$1}~$2
@@ -71,10 +73,10 @@ scroll (up | down) [<number>] = civ4.scroll($1, $2)
 
 select same = {ctrl g} {esc}
 select all = {alt g} {esc}
-focus <unit> [<number>] = civ4.focus_unit($1, parse_int($2))
-focus <unit> <number> through <number> = civ4.focus_unit($1, parse_int($2), parse_int($3))
-select <unit> [<number>] = civ4.select_unit($1, parse_int($2))
-select <unit> <number> through <number> = civ4.select_unit($1, parse_int($2), parse_int($3))
+(focus | select) <unit> [<number>] = var(do_select, $1 == select) civ4.focus_unit($2, parse_int($3), none(), $do_select)
+(focus | select) <unit> <number> through <number> = var(do_select, $1 == select) civ4.focus_unit($2, parse_int($3), parse_int($4), $do_select)
+(focus | select) <unit> <number> through right <number> = var(do_select, $1 == select) civ4.focus_unit($2, parse_int($3), -parse_int($4), $do_select)
+(focus | select) <unit> right <number> through <number> = var(do_select, $1 == select) civ4.focus_unit($2, -parse_int($3), -parse_int($4), $do_select)
 
 move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(click=True) 
 move all = mouse.move(300, 300) {alt g} state.grid.overlay(click=True) 
@@ -90,9 +92,10 @@ sentry = s
 build improvements = a
 build trade network = n
 improve nearest city = {shift ctrl c}
-cancel automation = {backspace}
+(cancel | stop) automation = {backspace}
 explore = e
 fortify until healed = h
+pillage = {shift p}
 
 nearest city = {ins}
 

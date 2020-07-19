@@ -38,7 +38,7 @@ def poll_scene(start_proc):
     custom_game = {'scene': 'Custom Game', 'validation assets': ['pane slider']}
     req = {
         'type': 'match',
-        'assets': [
+        'scenes': [
             custom_game
         ]
     }
@@ -73,10 +73,14 @@ def stop():
 
 def scene_match_skeleton(scene):
     if scene == 'Custom Game':
-        validation_assets = ['pane slider'] 
+        validation_assets = ['pane slider']
+    elif scene == 'Start Turn Build':
+        validation_assets = ['up arrow', 'down arrow', 'examine city']
+    elif scene == 'City Build':
+        validation_assets = ['up arrow', 'down arrow']
     else:
         validation_assets = []
-    return {'scene': scene, 'validation assets': validation_assets}
+    return {'scene': scene, 'validation assets': validation_assets, 'assets': []}
 
 def get_match_from_response(asset, resp):
     try:
@@ -94,7 +98,7 @@ def add_ai():
         keyboard.KeyPress.from_space_delimited_string('enter').send()
 
 def check_ai():
-    req = {"type": "match", "assets": [{**scene_match_skeleton('Custom Game'), 'assets': ['open', 'closed']}]}
+    req = {"type": "match", "scenes": [{**scene_match_skeleton('Custom Game'), 'assets': ['open', 'closed']}]}
     resp = request(req)
     return get_match_from_response('open', resp) or get_match_from_response('closed', resp)
 
@@ -115,7 +119,7 @@ def custom_game_scroll(direction, menu, check_fn=lambda: False, count=1):
 
 def custom_game_scroll_location(direction, menu):
     asset_name = f'{direction} arrow'
-    req = {"type": "match", 'multiple': True, "assets": [{**scene_match_skeleton('Custom Game'), 'assets': [asset_name]}]}
+    req = {"type": "match", 'multiple': True, "scenes": [{**scene_match_skeleton('Custom Game'), 'assets': [asset_name]}]}
     resp = request(req)
     if not resp:
         return
@@ -137,9 +141,8 @@ def scroll(direction, count=1):
     if count < 1:
         return
     asset_name = f'{direction} arrow'
-    req = {"type": "match", "assets": [{'scene': 'Start Turn Build', 'assets': [asset_name]}, {'scene': 'City Build', 'assets': [asset_name]}]}
+    req = {"type": "match", "scenes": [{'scene': 'Start Turn Build', 'assets': [asset_name]}, {'scene': 'City Build', 'assets': [asset_name]}]}
     resp = request(req)
-    print(resp)
     if not resp:
         return
     x, y = location_center(resp['matches'][asset_name])
@@ -161,7 +164,7 @@ def click_at(x, y):
     mouse.click()
 
 def focus_unit(unit_asset, from_num, to_num, do_select):
-    req = {"type": "match", 'multiple': True, "assets": [{**scene_match_skeleton('Unit Selection'), 'assets': [unit_asset]}]}
+    req = {"type": "match", 'multiple': True, "scenes": [{**scene_match_skeleton('Unit Selection'), 'assets': [unit_asset]}]}
     resp = request(req)
     if not resp['matches']:
         return
@@ -204,10 +207,12 @@ def _num_to_index(num, collection):
 def build(asset):
     win_coords = window_coords()
     validation_assets = ("up arrow", "down arrow")
-    req = {"type": "match", "assets": []}
+    req = {"type": "match", "scenes": []}
     for scene in ('Start Turn Build', 'City Build'):
-        asset_collection = {'scene': scene, "validation assets": validation_assets, 'assets': [] if asset in validation_assets else [asset]}
-        req['assets'].append(asset_collection)
+        asset_collection = scene_match_skeleton(scene)
+        if asset not in asset_collection['validation assets']:
+            asset_collection['assets'].append(asset)
+        req['scenes'].append(asset_collection)
     resp = request(req)
     scene = resp.get('scene')
     if not scene:
@@ -224,12 +229,11 @@ def build(asset):
         scroll_and_click(scene, asset)
 
 def custom_game_setting(num):
-    req = {'type': 'match', 'assets': [{**scene_match_skeleton('Custom Game'), 'assets': ['settings-selector']}], 'multiple': True}
+    req = {'type': 'match', 'scenes': [{**scene_match_skeleton('Custom Game'), 'assets': ['settings-selector']}], 'multiple': True}
     resp = request(req)
     matches = resp['matches']['settings-selector']
     idx = _num_to_index(num, matches)
     click_location(matches[idx])
-    print(resp)
 
 def click_asset(scene, asset):
     loc = find_asset(scene, asset)
@@ -240,7 +244,7 @@ def click_asset(scene, asset):
 
 def find_asset(scene, asset):
     win_coords = window_coords()
-    req = {"type": "match", "assets": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
+    req = {"type": "match", "scenes": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
     resp = request(req)
     if resp:
         return resp['matches'][asset]
@@ -254,7 +258,7 @@ def scroll_and_click(scene, asset):
             return
 
 def select_custom_game_player_option(row_idx, col_idx):
-    req = {"type": "match", "multiple": True, "assets": [{**scene_match_skeleton('Custom Game'), "assets": ["top option selector"]}]}
+    req = {"type": "match", "multiple": True, "scenes": [{**scene_match_skeleton('Custom Game'), "assets": ["top option selector"]}]}
     resp = request(req)
     if not resp:
         return

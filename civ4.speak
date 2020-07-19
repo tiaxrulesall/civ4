@@ -32,7 +32,7 @@ national_wonder := palace | national park | maoi statues
 world_wonder := (mausoleum of maw so law sis)='mausoleum of mausollus' | stonehenge | shwedagon paya | the great lighthouse | the pyramids 
 other_builable := wealth | research | culture
 buildable := <unit> | <building> | <national_wonder> | <world_wonder> | <other_builable>
-improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f}
+improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f} | mine=m | quarry=q
 promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (woodsman 1)='woodsman i'
 
 promote <promotion> = civ4.click_asset('Promotions', $1)
@@ -40,7 +40,7 @@ create group | creates a group = civ4.click_asset('Unit Commands', 'creates a gr
 separate group | separates the group = civ4.click_asset('Unit Commands', 'separates the group')
 build <buildable> = civ4.build($1)
 examine city = civ4.click_asset('Start Turn Build', 'examine city')
-<literal_direction> [<number>] = {$1}~$2
+press <literal_direction> [<number>] = {$1}~$2
 record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)
 play <letter> = macro.play($1)
@@ -92,6 +92,7 @@ sentry = s
 build improvements = a
 build trade network = n
 improve nearest city = {shift ctrl c}
+create fishing boats = f
 (cancel | stop) automation = {backspace}
 explore = e
 fortify until healed = h

@@ -17,8 +17,9 @@ bottom leader <number> = civ4.select_custom_game_player_option(-int($1), 2)
 bottom civilization <number> = civ4.select_custom_game_player_option(-int($1), 3)
 bottom difficulty <number> = civ4.select_custom_game_player_option(-int($1), 4)
 
-<option> = var(asset, civ4.find_asset('Custom Game', $1)) print($asset) mouse.move($asset['left'] - 15, $asset['top'] + 10) mouse.click()
-<victory> victory = var(asset, civ4.find_asset('Custom Game', $1 + ' victory')) print($asset) mouse.move($asset['left'] - 15, $asset['top'] + 10) mouse.click()
+<option> = var(asset, civ4.find_asset('Custom Game', $1)) mouse.move($asset['left'] - 15, $asset['top'] + 10) mouse.click()
+<victory> victory = var(asset, civ4.find_asset('Custom Game', $1 + ' victory')) mouse.move($asset['left'] - 15, $asset['top'] + 10) mouse.click()
+advanced start base points = var(asset, civ4.find_asset('Custom Game', 'advanced start base points')) mouse.move($asset['left'] + $asset['width'] + 15, $asset['top'] + 10) mouse.click()
 scroll (up | down) [<number>] = civ4.custom_game_scroll($1, 'top', count=$2)
 (setting | settings) scroll (up | down) [<number>] = civ4.custom_game_scroll($2, 'bottom', count=$3)
 add ai [<number>] = civ4.add_ai()~$1

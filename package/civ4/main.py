@@ -18,40 +18,43 @@ def adjust_match(match, img, cropped):
     }
 
 def handle_input(msg):
-    monitor_num = 1
     if msg['type'] == 'match':
-        multiple = msg.get('multiple', False)
-        match_fn = images.match_template if not multiple else images.match_template_multiple
-        for asset_collection in msg['assets']:
-            matches = {}
-            bounds_fn = get_bounds_fn(asset_collection['scene'])
-            if 'screenshot' in msg:
-                file_path = os.path.join('..', 'assets', msg['screenshot'])
-                ss, monitor, ss_bounds = images.screenshot_from_file(filename=file_path, bounds_fn=bounds_fn)
-            else:
-                ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=bounds_fn)
-            validation_assets = asset_collection.get('validation assets')
-            if validation_assets:
-                for asset in validation_assets:
-                    asset_path = get_asset_path(asset_collection['scene'], asset)
-                    template = images.get_asset_image(asset_path)
-                    match = match_fn(ss, template)
-                    if match:
-                        matches[asset] = match
-            if not matches and validation_assets:
-                continue
-            for asset in asset_collection.get('assets', []):
+        return handle_match(msg)
+    return {}
+
+def handle_match(msg):
+    monitor_num = 1
+    multiple = msg.get('multiple', False)
+    match_fn = images.match_template if not multiple else images.match_template_multiple
+    for asset_collection in msg['scenes']:
+        matches = {}
+        bounds_fn = get_bounds_fn(asset_collection['scene'])
+        if 'screenshot' in msg:
+            file_path = os.path.join('..', 'assets', msg['screenshot'])
+            ss, monitor, ss_bounds = images.screenshot_from_file(filename=file_path, bounds_fn=bounds_fn)
+        else:
+            ss, monitor, ss_bounds = images.screenshot(monitor_num=monitor_num, bounds_fn=bounds_fn)
+        validation_assets = asset_collection.get('validation assets')
+        if validation_assets:
+            for asset in validation_assets:
                 asset_path = get_asset_path(asset_collection['scene'], asset)
                 template = images.get_asset_image(asset_path)
                 match = match_fn(ss, template)
                 if match:
                     matches[asset] = match
-            if matches:
-                adjusted_matches = {}
-                for asset, match in matches.items():
-                    adjusted_matches[asset] = [adjust_match(x, monitor, ss_bounds) for x in match] if isinstance(match, list) else adjust_match(match, monitor, ss_bounds)
-                return {'scene': asset_collection['scene'], 'matches': adjusted_matches}
-    return {}
+        if not matches and validation_assets:
+            continue
+        for asset in asset_collection.get('assets', []):
+            asset_path = get_asset_path(asset_collection['scene'], asset)
+            template = images.get_asset_image(asset_path)
+            match = match_fn(ss, template)
+            if match:
+                matches[asset] = match
+        if matches:
+            adjusted_matches = {}
+            for asset, match in matches.items():
+                adjusted_matches[asset] = [adjust_match(x, monitor, ss_bounds) for x in match] if isinstance(match, list) else adjust_match(match, monitor, ss_bounds)
+            return {'scene': asset_collection['scene'], 'matches': adjusted_matches}
 
 def debug(msg):
     print(json.dumps({'debug': msg}))

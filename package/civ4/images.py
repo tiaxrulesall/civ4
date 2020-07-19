@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 
 asset_images = {}
 
+TEMPLATE_MATCH_THRESHOLD = 0.90
+
 def get_asset_image(filename):
     if filename not in asset_images:
         gray_image = cv2.imread(filename, 0)
@@ -21,7 +23,7 @@ def match_template_filename(img, template_filename):
 def match_template(img, template):
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    if max_val > 0.9:
+    if max_val > TEMPLATE_MATCH_THRESHOLD:
         left, top = max_loc
         width, height = template.shape[::-1]
         return {
@@ -63,7 +65,7 @@ def screenshot_from_file(filename, bounds_fn=None):
 
 def match_template_multiple(img, template):
     res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
-    threshold = 0.9
+    threshold = TEMPLATE_MATCH_THRESHOLD
     matches = []
     # fake out max_val for first run through loop
     max_val = 1

@@ -70,6 +70,9 @@ def get_bounds_fn(scene: str):
 
 def get_asset_path(scene, asset_name):
     root = os.path.join('..', 'assets')
+    asset_file_name = f"{'-'.join(asset_name.split())}.png"
+    if scene is None:
+        return os.path.join(root, asset_file_name)
     asset_folder = {
         'City Build': 'city-build',
         'Custom Game': 'custom-game',
@@ -78,7 +81,6 @@ def get_asset_path(scene, asset_name):
         'Start Turn Build': 'start-turn-build',
         'Unit Selection': 'start-turn-build',
     }[scene]
-    asset_file_name = f"{'-'.join(asset_name.split())}.png"
     return os.path.join(root, asset_folder, asset_file_name)
 
 

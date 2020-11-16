@@ -234,6 +234,11 @@ def custom_game_setting(num):
     idx = _num_to_index(num, matches)
     click_location(matches[idx])
 
+def click_first_matching_asset(assets):
+    for scene, asset in assets:
+        if click_asset(scene, asset):
+            break
+
 def click_asset(scene, asset):
     loc = find_asset(scene, asset)
     if loc:
@@ -241,9 +246,9 @@ def click_asset(scene, asset):
         return True
     return False
 
-def find_asset(scene, asset):
+def find_asset(scene, asset, multiple=False):
     win_coords = window_coords()
-    req = {"type": "match", "scenes": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
+    req = {"type": "match", "multiple": multiple, "scenes": [{"scene": scene, "assets": [asset]}], 'window coords': win_coords}
     resp = request(req)
     if resp:
         return resp['matches'][asset]
@@ -310,8 +315,16 @@ def _on_message(msg_str):
 
 _SCENE_VALIDATION = {
     # 'Start Turn Build': ('up arrow', 'down arrow')
-    # 'City Build': ('up arrow', 'down arrow')
+    # 'City Build': ('up arrow', 'down arrow')00
 }
+
+def select_saved_game(num):
+    match = find_asset(None, 'saved game icon', multiple=True)
+    try:
+        loc = match[num - 1]
+    except IndexError:
+        return
+    click_location(loc)
 
 def location_comparison(loc_a, loc_b):
     acmp = loc_a['top'], loc_a['left']

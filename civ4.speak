@@ -83,7 +83,7 @@ select all = {alt g} {esc}
 
 move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(click=True) 
 move all = mouse.move(300, 300) {alt g} state.grid.overlay(click=True) 
-go to = mouse.move(300, 300) g state.grid.overlay(click=True)
+go to [mode] = mouse.move(300, 300) g state.grid.overlay(click=True)
 route to = mouse.move(300, 300) {alt r}  state.grid.overlay(click=True)
 
 build [a | an] <improvement> = $2
@@ -101,6 +101,12 @@ create fishing boats = f
 explore = e
 fortify until healed = h
 pillage = {shift p}
+save game = {ctrl s}
+load game = {ctrl l}
+game <number> = civ4.select_saved_game(int($1))
+
+click ok = civ4.click_first_matching_asset([[none(), 'ok button'], [none(), 'ok button 2']])
+click cancel = civ4.click_first_matching_asset([[none(), 'cancel button'], [none(), 'cancel button 2']])
 
 nearest city | city screen = {ins}
 previous unit = '\\'

@@ -33,14 +33,17 @@ world_wonder := (mausoleum of maw so law sis)='mausoleum of mausollus' | stonehe
 other_builable := wealth | research | culture
 buildable := <unit> | <building> | <national_wonder> | <world_wonder> | <other_builable>
 improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f} | mine=m | quarry=q
-promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (woodsman 1)='woodsman i'
+promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (drill 1)='drill i' | (woodsman 1)='woodsman i'
 
 promote <promotion> = civ4.click_asset('Promotions', $1)
 create group | creates a group = civ4.click_asset('Unit Commands', 'creates a group')
 separate group | separates the group = civ4.click_asset('Unit Commands', 'separates the group')
+great scientist = civ4.click_asset('Unit Commands', 'great scientist')
+discover technology = civ4.click_asset('Unit Commands', 'discover technology')
+[start a] golden age = civ4.click_asset('Unit Commands', 'golden age')
 build <buildable> = civ4.build($1)
 examine city = civ4.click_asset('Start Turn Build', 'examine city')
-press <literal_direction> [<number>] = {$1}~$2
+<literal_direction> key [<number>] = {$1}~$2
 record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)
 play <letter> = macro.play($1)
@@ -85,6 +88,7 @@ route to = mouse.move(300, 300) {alt r}  state.grid.overlay(click=True)
 
 build [a | an] <improvement> = $2
 sleep | fortify = f
+wake up | wake [the] unit = f
 skip turn = {space}
 finish turn = {shift enter}
 build city = b
@@ -98,7 +102,11 @@ explore = e
 fortify until healed = h
 pillage = {shift p}
 
-nearest city = {ins}
+nearest city | city screen = {ins}
+previous unit = '\\'
+next unit = {enter}
+previous city [<number>] = {home}~$1
+next city [<number>] = {end}~$1
 
 increase (research | science) [<number>] = civ4.click_at(80, 60)
 reduce (research | science) [<number>] = civ4.click_at(100, 60)

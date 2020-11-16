@@ -181,7 +181,7 @@ def focus_unit(unit_asset, from_num, to_num, do_select):
         to_idx = from_idx + 1
     click_at(*locs[from_idx])
     time.sleep(0.1)
-    for x, y in locs[from_idx + 1: to_idx + 1]:
+    for x, y in locs[from_idx + 1: to_idx]:
         if not shift_pressed:
             keyboard.KeyPress.from_space_delimited_string('shift_hold').send()
             shift_pressed = True
@@ -206,7 +206,6 @@ def _num_to_index(num, collection):
 
 def build(asset):
     win_coords = window_coords()
-    validation_assets = ("up arrow", "down arrow")
     req = {"type": "match", "scenes": []}
     for scene in ('Start Turn Build', 'City Build'):
         asset_collection = scene_match_skeleton(scene)

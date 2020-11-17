@@ -10,6 +10,9 @@ import pathlib
 from communication.procs import ThreadedProcessHandler
 from recognition.actions.library import _mouse as mouse, window, stdlib, _keyboard as keyboard
 
+START_TURN_BUILD = 'Start Turn Build'
+CITY_BUILD = 'City Build'
+
 def proc():
     return stdlib.namespace['state'].civ4['proc']
 
@@ -54,7 +57,6 @@ def poll_scene(start_proc):
             stdlib.namespace['state'].civ4.update({'scene': resp['scene'], 'matches': resp['matches']})
         else:
             stdlib.namespace['state'].civ4.update({'scene': None, 'matches': []})
-        # print(stdlib.namespace['state'].civ4)
         time.sleep(2)
 
 def start():
@@ -74,9 +76,9 @@ def stop():
 def scene_match_skeleton(scene):
     if scene == 'Custom Game':
         validation_assets = ['pane slider']
-    elif scene == 'Start Turn Build':
+    elif scene == START_TURN_BUILD:
         validation_assets = ['up arrow', 'down arrow', 'examine city']
-    elif scene == 'City Build':
+    elif scene == CITY_BUILD:
         validation_assets = ['up arrow', 'down arrow']
     else:
         validation_assets = []
@@ -141,12 +143,12 @@ def scroll(direction, count=1):
     if count < 1:
         return
     asset_name = f'{direction} arrow'
-    req = {"type": "match", "scenes": [{'scene': 'Start Turn Build', 'assets': [asset_name]}, {'scene': 'City Build', 'assets': [asset_name]}]}
+    req = {"type": "match", "scenes": [{'scene': START_TURN_BUILD, 'assets': [asset_name]}, {'scene': CITY_BUILD, 'assets': [asset_name]}]}
     resp = request(req)
     if not resp:
         return
     x, y = location_center(resp['matches'][asset_name])
-    if  resp['scene'] == 'Start Turn Build':
+    if  resp['scene'] == START_TURN_BUILD:
         y = y - 15 if direction == 'down' else y + 15
     mouse.move(x, y)
     for i in range(count):
@@ -207,7 +209,7 @@ def _num_to_index(num, collection):
 def build(asset):
     win_coords = window_coords()
     req = {"type": "match", "scenes": []}
-    for scene in ('Start Turn Build', 'City Build'):
+    for scene in (START_TURN_BUILD, CITY_BUILD):
         asset_collection = scene_match_skeleton(scene)
         if asset not in asset_collection['validation assets']:
             asset_collection['assets'].append(asset)
@@ -221,9 +223,9 @@ def build(asset):
         click_location(resp['matches'][asset])
     elif down_arrow:
         downx, downy = location_center(down_arrow)
-        if scene == 'Start Turn':
+        if scene == START_TURN_BUILD:
             mouse.move(downx, downy - 15)
-        elif scene == 'City Build':
+        elif scene == CITY_BUILD:
             mouse.move(downx, downy)
         scroll_and_click(scene, asset)
 
@@ -312,11 +314,6 @@ def _on_message(msg_str):
         print(msg['debug'])
     else:
         responses[msg['id']] = msg
-
-_SCENE_VALIDATION = {
-    # 'Start Turn Build': ('up arrow', 'down arrow')
-    # 'City Build': ('up arrow', 'down arrow')00
-}
 
 def select_saved_game(num):
     match = find_asset(None, 'saved game icon', multiple=True)

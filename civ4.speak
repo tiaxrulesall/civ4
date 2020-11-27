@@ -7,6 +7,7 @@ on_deactivate() => keyboard.remove_delay(/numkey\d/) print('civ 4 deactivate') c
 mouseMove(pos) => mouse.move($pos[0], $pos[1])
 moveUnit(key, count) => {$key}~$count
 doubleClick() => mouse.click() wait(.05) mouse.click()
+right_click_hold() => mouse.press(button=right)
 centerPos() => [300, 300]
 
 literal_direction := up | down | right | left
@@ -48,7 +49,7 @@ record macro <letter> = macro.record($1)
 stop recording [<letter>] = macro.stop($1)
 play <letter> = macro.play($1)
 mouse grid = state.grid.overlay() 
-grid select = state.grid.overlay(click=True) 
+grid select = state.grid.overlay(on_done=mouse.click) 
 gray text = setattr(state.grid, 'font_color', [128,128,128]) 
 center mouse = mouseMove(centerPos()) 
 domestic advisor = {f1}
@@ -81,10 +82,10 @@ select all = {alt g} {esc}
 (focus | select) <unit> <number> through right <number> = var(do_select, $1 == select) civ4.focus_unit($2, parse_int($3), -parse_int($4), $do_select)
 (focus | select) <unit> right <number> through <number> = var(do_select, $1 == select) civ4.focus_unit($2, -parse_int($3), -parse_int($4), $do_select)
 
-move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(click=True) 
-move all = mouse.move(300, 300) {alt g} state.grid.overlay(click=True) 
-go to [mode] = mouse.move(300, 300) g state.grid.overlay(click=True)
-route to = mouse.move(300, 300) {alt r}  state.grid.overlay(click=True)
+move same = mouse.move(300, 300) {ctrl g} state.grid.overlay(on_done=mouse.click) 
+move all = mouse.move(300, 300) {alt g} state.grid.overlay(on_done=mouse.click) 
+route to = mouse.move(300, 300) {alt r}  state.grid.overlay(on_done=mouse.click)
+go to [mode] = mouse.move(300, 300) g state.grid.overlay(on_done=mouse.click)
 
 build [a | an] <improvement> = $2
 sleep | fortify = f

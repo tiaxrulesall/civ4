@@ -118,6 +118,8 @@ def custom_game_scroll(direction, menu, check_fn=lambda: False, count=1):
         if check_result:
             return check_result
 
+def research_tech(tech):
+    pass
 
 def custom_game_scroll_location(direction, menu):
     asset_name = f'{direction} arrow'

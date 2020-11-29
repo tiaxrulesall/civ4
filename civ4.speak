@@ -35,7 +35,10 @@ other_builable := wealth | research | culture
 buildable := <unit> | <building> | <national_wonder> | <world_wonder> | <other_builable>
 improvement := farm=i | cottage=t | watermill={shift w} | road=r | workshop=k | fort={ctrl f} | mine=m | quarry=q
 promotion := (combat 1)='combat i' | (combat 2)='combat ii' | (city raider 1)='city raider i' | (drill 1)='drill i' | (woodsman 1)='woodsman i'
+tech := fishing | (the wheel) | agriculture
 
+upgrade [to] <unit> = civ4.click_asset('Unit Commands', $-1)
+upgrade all [to] <unit> = {alt_hold} civ4.click_asset('Unit Commands', $-1) {alt_release}
 promote <promotion> = civ4.click_asset('Promotions', $1)
 create group | creates a group = civ4.click_asset('Unit Commands', 'creates a group')
 separate group | separates the group = civ4.click_asset('Unit Commands', 'separates the group')
